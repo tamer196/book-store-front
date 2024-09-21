@@ -1,0 +1,191 @@
+<div class="card border rounded-lg shadow-lg">
+  <div class="card-header bg-gray-100 p-4">
+    <div class="container mx-auto mt-8">
+      <!-- Header Section -->
+      <div class="mb-4 flex justify-between items-center">
+        <h2 class="text-2xl font-bold">Books</h2>
+        <button class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
+          + New
+        </button>
+      </div>
+    
+      <!-- Search Input for Filtering -->
+      <div class="mb-4">
+        <input
+          type="text"
+          placeholder="Search by Name..."
+          [(ngModel)]="searchTerm"
+          (input)="filterBooks()"
+          class="border border-gray-300 rounded-lg p-2 w-full shadow-sm"
+        />
+      </div>
+    
+      <!-- Data Table -->
+      <div class="overflow-x-auto shadow-md sm:rounded-lg">
+        <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+          <thead class="bg-gray-100 text-sm text-gray-700 uppercase tracking-wide">
+            <tr>
+              <th class="py-3 px-6 text-left cursor-pointer" (click)="sortData('name')">
+                Name &#9650;&#9660;
+              </th>
+              <th class="py-3 px-6 text-left cursor-pointer" (click)="sortData('authorName')">
+                Author &#9650;&#9660;
+              </th>
+              <th class="py-3 px-6 text-left cursor-pointer" (click)="sortData('type')">
+                Type &#9650;&#9660;
+              </th>
+              <th class="py-3 px-6 text-left cursor-pointer" (click)="sortData('publishDate')">
+                Publish Date &#9650;&#9660;
+              </th>
+              <th class="py-3 px-6 text-left cursor-pointer" (click)="sortData('price')">
+                Price &#9650;&#9660;
+              </th>
+              <th class="py-3 px-6 text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="text-gray-600 text-sm">
+            <tr
+              *ngFor="let book of paginatedBooks"
+              class="bg-white odd:bg-gray-50 border-b hover:bg-gray-100"
+            >
+              <td class="py-3 px-6 text-left">{{ book.name }}</td>
+              <td class="py-3 px-6 text-left">{{ book.authorName }}</td>
+              <td class="py-3 px-6 text-left">{{ book.type }}</td>
+              <td class="py-3 px-6 text-left">{{ book.publishDate | date }}</td>
+              <td class="py-3 px-6 text-left">{{ book.price | currency }}</td>
+              <td class="py-3 px-6 text-left whitespace-nowrap">
+                <div class="flex space-x-2">
+                  <button
+                    class="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 flex items-center"
+                    (click)="editBook(book.id)"
+                  >
+                    <i class="fas fa-edit mr-1"></i>Edit
+                  </button>
+                  <button
+                    class="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 flex items-center"
+                    (click)="deleteBook(book.id)"
+                  >
+                    <i class="fas fa-trash-alt mr-1"></i>Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    
+      <!-- Pagination Controls -->
+      <div class="mt-4 flex justify-between items-center">
+        <button
+          class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400"
+          (click)="previousPage()"
+          [disabled]="currentPage === 1"
+        >
+          &#8249; <!-- Left Arrow Symbol -->
+        </button>
+        <span>Page {{ currentPage }} of {{ totalPages }}</span>
+        <button
+          class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400"
+          (click)="nextPage()"
+          [disabled]="currentPage === totalPages"
+        >
+          &#8250; <!-- Right Arrow Symbol -->
+        </button>
+      </div>
+    </div>
+    
+    
+  </div>
+</div>
+
+<abp-modal [(visible)]="isModalOpen" class="rounded-lg shadow-lg">
+  <ng-template #abpHeader>
+    <h3 class="text-lg font-bold">
+      {{ (selectedBook.id ? '::Edit' : '::NewBook') | abpLocalization }}
+    </h3>
+  </ng-template>
+
+  <ng-template #abpBody>
+    <form id="book-form" [formGroup]="form" (ngSubmit)="save()">
+      <div class="form-group mb-4">
+        <label for="author-id" class="block mb-2">Author</label><span class="text-red-500"> * </span>
+        <select
+          class="form-control block w-full border-gray-300 rounded-lg p-2"
+          id="author-id"
+          formControlName="authorId"
+        >
+          <option [ngValue]="null">Select author</option>
+          <option [ngValue]="author.id" *ngFor="let author of authors$ | async">
+            {{ author.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group mb-4">
+        <label for="book-name" class="block mb-2">Name</label><span class="text-red-500"> * </span>
+        <input
+          type="text"
+          id="book-name"
+          class="form-control block w-full border-gray-300 rounded-lg p-2"
+          formControlName="name"
+          autofocus
+        />
+      </div>
+
+      <div class="form-group mb-4">
+        <label for="book-price" class="block mb-2">Price</label><span class="text-red-500"> * </span>
+        <input
+          type="number"
+          id="book-price"
+          class="form-control block w-full border-gray-300 rounded-lg p-2"
+          formControlName="price"
+        />
+      </div>
+
+      <div class="form-group mb-4">
+        <label for="book-type" class="block mb-2">Type</label><span class="text-red-500"> * </span>
+        <select
+          class="form-control block w-full border-gray-300 rounded-lg p-2"
+          id="book-type"
+          formControlName="type"
+        >
+          <option [ngValue]="null">Select a book type</option>
+          <option [ngValue]="type.value" *ngFor="let type of bookTypes">
+            {{ type.key }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group mb-4">
+        <label for="book-publish-date" class="block mb-2">Publish date</label><span class="text-red-500"> * </span>
+        <input
+          id="book-publish-date"
+          ngbDatepicker
+          #datepicker="ngbDatepicker"
+          formControlName="publishDate"
+          class="form-control block w-full border-gray-300 rounded-lg p-2"
+          (click)="datepicker.toggle()"
+        />
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template #abpFooter>
+    <button
+      type="button"
+      class="btn bg-gray-300 text-gray-700 px-4 py-2 rounded mr-2"
+      #abpClose
+    >
+      {{ '::Cancel' | abpLocalization }}
+    </button>
+
+    <button
+      form="book-form"
+      class="btn bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+      [disabled]="form.invalid || form.pristine"
+    >
+      <i class="fa fa-check mr-1"></i>
+      {{ '::Save' | abpLocalization }}
+    </button>
+  </ng-template>
+</abp-modal>
