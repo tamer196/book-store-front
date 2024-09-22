@@ -6,7 +6,7 @@ import { NgbDateAdapter } from '@ng-bootstrap/ng-bootstrap';
 import { ConfirmationService, Confirmation, DateAdapter } from '@abp/ng.theme.shared';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-// import '~@fortawesome/fontawesome-free/css/all.min.css';
+import { AuthorService } from '@proxy/authors/author.service';
 
 @Component({
   selector: 'app-book',
@@ -25,20 +25,26 @@ export class BookComponent implements OnInit {
   sortDirection = 'asc';
   currentSortField = '';
 
-  authors$: Observable<any>;
   form: FormGroup;
   selectedBook = {} as BookDto;
   isModalOpen = false;
+  authors$: Observable<AuthorLookupDto[]>;
 
   constructor(
     private bookService: BookService,
     private fb: FormBuilder,
-    private confirmation: ConfirmationService
-  ) {}
+    private confirmation: ConfirmationService,
+    public readonly list: ListService,
+    private authorService: AuthorService,
+  ) { 
+     this.authors$ = bookService.getAuthorLookup().pipe(map((r) => r.items));
+  }
 
   ngOnInit() {
     this.loadBooks();
+    
   }
+  bookTypes = bookTypeOptions;
 
   loadBooks() {
     const requestParams: PagedAndSortedResultRequestDto = {
@@ -128,6 +134,7 @@ export class BookComponent implements OnInit {
   }
 
   save() {
+    debugger
     if (this.form.invalid) return;
 
     const request = this.selectedBook.id

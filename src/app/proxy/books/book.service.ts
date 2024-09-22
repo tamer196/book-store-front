@@ -15,6 +15,7 @@ export class BookService {
       url: `/api/app/book`,
       body: input,
     },
+    
     { apiName: this.apiName });
 
   delete = (id: string) =>

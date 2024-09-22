@@ -1,119 +1,77 @@
-<div class="card border rounded-lg shadow-lg">
-  <div class="card-header bg-gray-100 p-4">
-    <div class="container mx-auto mt-8">
-      <!-- Header Section -->
-      <div class="mb-4 flex justify-between items-center">
-        <h2 class="text-2xl font-bold">Books</h2>
-        <button class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
-          + New
-        </button>
-      </div>
-    
-      <!-- Search Input for Filtering -->
-      <div class="mb-4">
-        <input
-          type="text"
-          placeholder="Search by Name..."
-          [(ngModel)]="searchTerm"
-          (input)="filterBooks()"
-          class="border border-gray-300 rounded-lg p-2 w-full shadow-sm"
-        />
-      </div>
-    
-      <!-- Data Table -->
-      <div class="overflow-x-auto shadow-md sm:rounded-lg">
-        <table class="min-w-full bg-white border border-gray-200 rounded-lg">
-          <thead class="bg-gray-100 text-sm text-gray-700 uppercase tracking-wide">
-            <tr>
-              <th class="py-3 px-6 text-left cursor-pointer" (click)="sortData('name')">
-                Name &#9650;&#9660;
-              </th>
-              <th class="py-3 px-6 text-left cursor-pointer" (click)="sortData('authorName')">
-                Author &#9650;&#9660;
-              </th>
-              <th class="py-3 px-6 text-left cursor-pointer" (click)="sortData('type')">
-                Type &#9650;&#9660;
-              </th>
-              <th class="py-3 px-6 text-left cursor-pointer" (click)="sortData('publishDate')">
-                Publish Date &#9650;&#9660;
-              </th>
-              <th class="py-3 px-6 text-left cursor-pointer" (click)="sortData('price')">
-                Price &#9650;&#9660;
-              </th>
-              <th class="py-3 px-6 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="text-gray-600 text-sm">
-            <tr
-              *ngFor="let book of paginatedBooks"
-              class="bg-white odd:bg-gray-50 border-b hover:bg-gray-100"
+<div class="table-container">
+  <!-- Search Input for Filtering -->
+  <div class="filter-container ">
+    <input
+      type="text"
+      placeholder="Search by Name..."
+      [(ngModel)]="searchTerm"
+      (input)="filterBooks()"
+      class="filter-input"
+    />
+
+      <div class="row">
+        <div class="text-right col col-md-6 flex flex-end" >
+          <div class="text-lg-right pt-2">
+            <button
+              abpPermission="BookStore.Books.Create"
+              id="create"
+              class="btn btn-primary"
+              type="button"
+              (click)="createBook()"
             >
-              <td class="py-3 px-6 text-left">{{ book.name }}</td>
-              <td class="py-3 px-6 text-left">{{ book.authorName }}</td>
-              <td class="py-3 px-6 text-left">{{ book.type }}</td>
-              <td class="py-3 px-6 text-left">{{ book.publishDate | date }}</td>
-              <td class="py-3 px-6 text-left">{{ book.price | currency }}</td>
-              <td class="py-3 px-6 text-left whitespace-nowrap">
-                <div class="flex space-x-2">
-                  <button
-                    class="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 flex items-center"
-                    (click)="editBook(book.id)"
-                  >
-                    <i class="fas fa-edit mr-1"></i>Edit
-                  </button>
-                  <button
-                    class="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 flex items-center"
-                    (click)="deleteBook(book.id)"
-                  >
-                    <i class="fas fa-trash-alt mr-1"></i>Delete
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              <i class="fa fa-plus mr-1"></i>
+              <span>{{ '::NewBook' | abpLocalization }}</span>
+            </button>
+          </div>
+        </div>
       </div>
-    
-      <!-- Pagination Controls -->
-      <div class="mt-4 flex justify-between items-center">
-        <button
-          class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400"
-          (click)="previousPage()"
-          [disabled]="currentPage === 1"
-        >
-          &#8249; <!-- Left Arrow Symbol -->
-        </button>
-        <span>Page {{ currentPage }} of {{ totalPages }}</span>
-        <button
-          class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400"
-          (click)="nextPage()"
-          [disabled]="currentPage === totalPages"
-        >
-          &#8250; <!-- Right Arrow Symbol -->
-        </button>
-      </div>
-    </div>
-    
-    
+  </div>
+
+  <!-- Data Table -->
+  <table class="table">
+    <thead>
+      <tr>
+        <th (click)="sortData('name')">Name &#9650;&#9660;</th>
+        <th (click)="sortData('authorName')">Author &#9650;&#9660;</th>
+        <th (click)="sortData('type')">Type &#9650;&#9660;</th>
+        <th (click)="sortData('publishDate')">Publish Date &#9650;&#9660;</th>
+        <th (click)="sortData('price')">Price &#9650;&#9660;</th>
+        <th>Actions</th>
+
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let book of paginatedBooks">
+        <td>{{ book.name }}</td>
+        <td>{{ book.authorName }}</td>
+        <td>{{ book.type }}</td>
+        <td>{{ book.publishDate | date }}</td>
+        <td>{{ book.price | currency }}</td>
+        <td>
+          <button class="btn-action" (click)="editBook(book.id)">Edit</button>
+          <button class="btn-action" (click)="deleteBook(book.id)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Pagination Controls -->
+  <div class="pagination">
+    <button (click)="previousPage()" [disabled]="currentPage === 1">Previous</button>
+    <span>Page {{ currentPage }} of {{ totalPages }}</span>
+    <button (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
   </div>
 </div>
-
-<abp-modal [(visible)]="isModalOpen" class="rounded-lg shadow-lg">
+<abp-modal [(visible)]="isModalOpen">
   <ng-template #abpHeader>
-    <h3 class="text-lg font-bold">
-      {{ (selectedBook.id ? '::Edit' : '::NewBook') | abpLocalization }}
-    </h3>
+    <h3>{{ (selectedBook.id ? '::Edit' : '::NewBook') | abpLocalization }}</h3>
   </ng-template>
 
   <ng-template #abpBody>
     <form id="book-form" [formGroup]="form" (ngSubmit)="save()">
-      <div class="form-group mb-4">
-        <label for="author-id" class="block mb-2">Author</label><span class="text-red-500"> * </span>
-        <select
-          class="form-control block w-full border-gray-300 rounded-lg p-2"
-          id="author-id"
-          formControlName="authorId"
-        >
+      <div class="form-group">
+        <label for="author-id">Author</label><span> * </span>
+        <select class="form-control" id="author-id" formControlName="authorId">
           <option [ngValue]="null">Select author</option>
           <option [ngValue]="author.id" *ngFor="let author of authors$ | async">
             {{ author.name }}
@@ -121,49 +79,32 @@
         </select>
       </div>
 
-      <div class="form-group mb-4">
-        <label for="book-name" class="block mb-2">Name</label><span class="text-red-500"> * </span>
-        <input
-          type="text"
-          id="book-name"
-          class="form-control block w-full border-gray-300 rounded-lg p-2"
-          formControlName="name"
-          autofocus
-        />
+      <div class="form-group">
+        <label for="book-name">Name</label><span> * </span>
+        <input type="text" id="book-name" class="form-control" formControlName="name" autofocus />
       </div>
 
-      <div class="form-group mb-4">
-        <label for="book-price" class="block mb-2">Price</label><span class="text-red-500"> * </span>
-        <input
-          type="number"
-          id="book-price"
-          class="form-control block w-full border-gray-300 rounded-lg p-2"
-          formControlName="price"
-        />
+      <div class="form-group">
+        <label for="book-price">Price</label><span> * </span>
+        <input type="number" id="book-price" class="form-control" formControlName="price" />
       </div>
 
-      <div class="form-group mb-4">
-        <label for="book-type" class="block mb-2">Type</label><span class="text-red-500"> * </span>
-        <select
-          class="form-control block w-full border-gray-300 rounded-lg p-2"
-          id="book-type"
-          formControlName="type"
-        >
+      <div class="form-group">
+        <label for="book-type">Type</label><span> * </span>
+        <select class="form-control" id="book-type" formControlName="type">
           <option [ngValue]="null">Select a book type</option>
-          <option [ngValue]="type.value" *ngFor="let type of bookTypes">
-            {{ type.key }}
-          </option>
+          <option [ngValue]="type.value" *ngFor="let type of bookTypes">{{ type.key }}</option>
         </select>
       </div>
 
-      <div class="form-group mb-4">
-        <label for="book-publish-date" class="block mb-2">Publish date</label><span class="text-red-500"> * </span>
+      <div class="form-group">
+        <label for="book-publish-date">Publish date</label><span> * </span>
         <input
           id="book-publish-date"
           ngbDatepicker
           #datepicker="ngbDatepicker"
           formControlName="publishDate"
-          class="form-control block w-full border-gray-300 rounded-lg p-2"
+          class="form-control"
           (click)="datepicker.toggle()"
         />
       </div>
@@ -171,19 +112,7 @@
   </ng-template>
 
   <ng-template #abpFooter>
-    <button
-      type="button"
-      class="btn bg-gray-300 text-gray-700 px-4 py-2 rounded mr-2"
-      #abpClose
-    >
-      {{ '::Cancel' | abpLocalization }}
-    </button>
-
-    <button
-      form="book-form"
-      class="btn bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-      [disabled]="form.invalid || form.pristine"
-    >
+    <button form="book-form" class="btn btn-primary" [disabled]="form.invalid || form.pristine">
       <i class="fa fa-check mr-1"></i>
       {{ '::Save' | abpLocalization }}
     </button>
